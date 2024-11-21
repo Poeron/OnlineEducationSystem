@@ -1,14 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using OnlineEducationSystem.Data;
+using OnlineEducationSystem.Helpers;
 using OnlineEducationSystem.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Npgsql;
 
 namespace OnlineEducationSystem.Controllers;
 
@@ -16,22 +13,22 @@ namespace OnlineEducationSystem.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-    private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly DatabaseHelper _dbHelper;
 
-    public AuthController(AppDbContext context, IConfiguration configuration)
+    public AuthController(IConfiguration configuration)
     {
-        _context = context;
         _configuration = configuration;
+        var connectionString = configuration.GetConnectionString("PostgreSqlConnection");
+        _dbHelper = new DatabaseHelper(connectionString!);
     }
+
     private string GenerateToken(User user)
     {
         var claims = new[]
         {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("userId", user.Id.ToString()),
-                new Claim("role", user.Role)
+                new Claim("user_id", user.user_id.ToString()),
+                new Claim("role", user.role)
             };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
@@ -48,47 +45,50 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
+    public IActionResult Login([FromBody] LoginDTO user)
     {
-        var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Username == loginDto.Username && u.Password == loginDto.Password);
-
-        if (user == null)
+        var query = "SELECT user_id,role FROM users WHERE email = @email AND password = @password";
+        var parameters = new NpgsqlParameter[]
         {
-            return Unauthorized("Invalid username or password.");
+            new NpgsqlParameter("@email", user.email),
+            new NpgsqlParameter("@password", user.password)
+        };
+
+        var result = _dbHelper.ExecuteReader(query, reader => new 
+        {
+            user_id = reader.GetInt32(0),
+            role = reader.GetString(1)
+        }, parameters).FirstOrDefault();
+
+        if (result == null)
+        {
+            return Unauthorized();
         }
 
-        var token = GenerateToken(user);
-        return Ok(new { Token = token });
+        var token = GenerateToken(new User
+        {
+            user_id = result.user_id,
+            role = result.role
+        });
+
+        return Ok(new { Token = token, Role = result.role });
+
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDTO registerDto)
+    public IActionResult Register([FromBody] RegisterDTO user)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == registerDto.Username);
-
-        if (user != null)
+        var query = "INSERT INTO users (email, password, role, name) VALUES (@email, @password, @role, @name)";
+        var parameters = new[]
         {
-            return BadRequest("Username already exists.");
-        }
-
-        user = new User
-        {
-            Username = registerDto.Username,
-            Password = registerDto.Password,
-            Role = "User"
+            new NpgsqlParameter("@email", user.email),
+            new NpgsqlParameter("@password", user.password),
+            new NpgsqlParameter("@role", user.role),
+            new NpgsqlParameter("@name", user.name)
         };
 
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
+        _dbHelper.ExecuteNonQuery(query, parameters);
 
-        return Ok("Registration successful!");
-    }
-
-    [HttpGet("protected")]
-    [Authorize]
-    public IActionResult ProtectedEndpoint()
-    {
-        return Ok("Bu endpoint korumalıdır ve yalnızca giriş yapmış kullanıcılar erişebilir.");
+        return Ok();
     }
 }
