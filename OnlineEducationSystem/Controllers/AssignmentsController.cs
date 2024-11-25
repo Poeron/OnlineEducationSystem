@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using OnlineEducationSystem.Helpers;
 using OnlineEducationSystem.Models;
@@ -26,17 +27,15 @@ public class AssignmentsController : ControllerBase
         var assignments = _dbHelper.ExecuteReader(query, reader => new Assignments
         {
             assignment_id = reader.GetInt32(0),
-            course_id = reader.IsDBNull(1) ? null : reader.GetInt32(1),
+            course_id = reader.GetInt32(1),
             title = reader.GetString(2),
             description = reader.IsDBNull(3) ? null : reader.GetString(3),
             due_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
             created_at = reader.GetDateTime(5),
             updated_at = reader.GetDateTime(6),
             deleted_at = reader.IsDBNull(7) ? null : reader.GetDateTime(7)
-        });
-        // remove deleted assignments
-        assignments = assignments.Where(assignment => assignment.deleted_at == null).ToList();
-        
+        }).Where(assignment => assignment.deleted_at == null).ToList();
+
         return Ok(assignments);
     }
 
@@ -52,7 +51,7 @@ public class AssignmentsController : ControllerBase
         var assignment = _dbHelper.ExecuteReader(query, reader => new Assignments
         {
             assignment_id = reader.GetInt32(0),
-            course_id = reader.IsDBNull(1) ? null : reader.GetInt32(1),
+            course_id = reader.GetInt32(1),
             title = reader.GetString(2),
             description = reader.IsDBNull(3) ? null : reader.GetString(3),
             due_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
@@ -61,14 +60,15 @@ public class AssignmentsController : ControllerBase
             deleted_at = reader.IsDBNull(7) ? null : reader.GetDateTime(7)
         }, parameters).FirstOrDefault();
 
-        // check if assignment is deleted or there is no assignment with the given id
         if (assignment == null || assignment.deleted_at != null)
         {
             return NotFound();
         }
+
         return Ok(assignment);
     }
 
+    [Authorize(Roles = "instructor")]
     [HttpPost]
     public IActionResult CreateAssignment([FromBody] CreateAssignments assignment)
     {
@@ -77,43 +77,43 @@ public class AssignmentsController : ControllerBase
         {
             new NpgsqlParameter("@course_id", assignment.course_id),
             new NpgsqlParameter("@title", assignment.title),
-            new NpgsqlParameter("@description", assignment.description),
-            new NpgsqlParameter("@due_date", assignment.due_date)
+            new NpgsqlParameter("@description", assignment.description ?? (object)DBNull.Value),
+            new NpgsqlParameter("@due_date", assignment.due_date ?? (object)DBNull.Value)
         };
 
-        _dbHelper.ExecuteNonQuery(query, parameters);
-
-        return Ok();
+        var assignmentId = _dbHelper.ExecuteNonQuery(query, parameters);
+        return Ok(assignmentId);
     }
+
+    [Authorize(Roles = "instructor")]
     [HttpPatch]
     public IActionResult UpdateAssignment([FromBody] PatchAssignments assignment)
     {
-        var query = "UPDATE assignments SET course_id = @course_id, title = @title, description = @description, due_date = @due_date WHERE assignment_id = @assignment_id";
+        var query = "UPDATE assignments SET title = @title, description = @description, due_date = @due_date WHERE assignment_id = @assignment_id";
         var parameters = new NpgsqlParameter[]
         {
-            new NpgsqlParameter("@course_id", assignment.course_id),
+            new NpgsqlParameter("@assignment_id", assignment.assignment_id),
             new NpgsqlParameter("@title", assignment.title),
-            new NpgsqlParameter("@description", assignment.description),
-            new NpgsqlParameter("@due_date", assignment.due_date),
-            new NpgsqlParameter("@assignment_id", assignment.assignment_id)
+            new NpgsqlParameter("@description", assignment.description ?? (object)DBNull.Value),
+            new NpgsqlParameter("@due_date", assignment.due_date ?? (object)DBNull.Value)
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-
         return Ok();
     }
+
+    [Authorize(Roles = "instructor,admin")]
     [HttpDelete("{id}")]
     public IActionResult DeleteAssignment(int id)
     {
         var query = "UPDATE assignments SET deleted_at = @deleted_at WHERE assignment_id = @assignment_id";
         var parameters = new NpgsqlParameter[]
         {
-            new NpgsqlParameter("@deleted_at", DateTime.Now),
-            new NpgsqlParameter("@assignment_id", id)
+            new NpgsqlParameter("@assignment_id", id),
+            new NpgsqlParameter("@deleted_at", DateTime.Now)
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-
         return Ok();
     }
 }

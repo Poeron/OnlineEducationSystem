@@ -23,7 +23,7 @@ public class AuthController : ControllerBase
         _dbHelper = new DatabaseHelper(connectionString!);
     }
 
-    private string GenerateToken(User user)
+    private string GenerateToken(Users user)
     {
         var claims = new[]
         {
@@ -65,7 +65,7 @@ public class AuthController : ControllerBase
             return Unauthorized();
         }
 
-        var token = GenerateToken(new User
+        var token = GenerateToken(new Users
         {
             user_id = result.user_id,
             role = result.role

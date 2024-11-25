@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using OnlineEducationSystem.Helpers;
 using OnlineEducationSystem.Models;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace OnlineEducationSystem.Controllers;
 
@@ -21,42 +20,32 @@ public class CourseEnrollmentsController : ControllerBase
         _dbHelper = new DatabaseHelper(connectionString!);
     }
 
-    [Authorize(Roles = "instructor,admin")]
     [HttpGet]
-    public IActionResult GetCourseEnrollments(int course_id)
+    public IActionResult GetCourseEnrollments()
     {
-        var query = "SELECT * FROM courseEnrollments WHERE course_id = @course_id";
-        var parameters = new NpgsqlParameter[]
-        {
-            new NpgsqlParameter("@course_id", course_id)
-        };
-        var courseEnrollments = _dbHelper.ExecuteReader(query, reader => new CourseEnrollments
+        var query = "SELECT * FROM CourseEnrollments";
+        var enrollments = _dbHelper.ExecuteReader(query, reader => new CourseEnrollments
         {
             enrollment_id = reader.GetInt32(0),
             course_id = reader.GetInt32(1),
             student_id = reader.GetInt32(2),
             enrollment_date = reader.GetDateTime(3),
             deleted_at = reader.IsDBNull(4) ? null : reader.GetDateTime(4)
-        }, parameters);
-        // remove deleted course enrollments
-        courseEnrollments = courseEnrollments.Where(courseEnrollment => courseEnrollment.deleted_at == null).ToList();
-        if (courseEnrollments.Count == 0)
-        {
-            return NotFound();
-        }
-        return Ok(courseEnrollments);
+        }).Where(enrollment => enrollment.deleted_at == null).ToList();
+
+        return Ok(enrollments);
     }
-    [Authorize(Roles = "instructor,admin")]
+
     [HttpGet("{id}")]
     public IActionResult GetCourseEnrollment(int id)
     {
-        var query = "SELECT * FROM courseEnrollments WHERE enrollment_id = @id";
+        var query = "SELECT * FROM CourseEnrollments WHERE enrollment_id = @id";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@id", id)
         };
 
-        var courseEnrollment = _dbHelper.ExecuteReader(query, reader => new CourseEnrollments
+        var enrollment = _dbHelper.ExecuteReader(query, reader => new CourseEnrollments
         {
             enrollment_id = reader.GetInt32(0),
             course_id = reader.GetInt32(1),
@@ -65,54 +54,41 @@ public class CourseEnrollmentsController : ControllerBase
             deleted_at = reader.IsDBNull(4) ? null : reader.GetDateTime(4)
         }, parameters).FirstOrDefault();
 
-        if (courseEnrollment == null || courseEnrollment.deleted_at != null)
+        if (enrollment == null || enrollment.deleted_at != null)
         {
             return NotFound();
         }
 
-        return Ok(courseEnrollment);
-
+        return Ok(enrollment);
     }
 
-    [Authorize(Roles = "student")]
+    [Authorize]
     [HttpPost]
-    public IActionResult CreateCourseEnrollment([FromBody] CreateCourseEnrollments course)
+    public IActionResult CreateCourseEnrollment([FromBody] CreateCourseEnrollments enrollment)
     {
-        // Get the JWT bearer token from the request headers
-        var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-
-        // Decode the JWT bearer token to get the user id
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
-        var userId = jwtToken.Claims.FirstOrDefault(claim => claim.Type == "user_id")!.Value;
-        // Use the user id as the student id in the course enrollment
-        int student_id = int.Parse(userId);
-
-        var query = "INSERT INTO courseEnrollments (course_id, student_id) VALUES (@course_id, @student_id)";
+        var query = "INSERT INTO CourseEnrollments (course_id, student_id) VALUES (@course_id, @student_id)";
         var parameters = new NpgsqlParameter[]
         {
-            new NpgsqlParameter("@course_id", course.course_id),
-            new NpgsqlParameter("@student_id", student_id)
+            new NpgsqlParameter("@course_id", enrollment.course_id),
+            new NpgsqlParameter("@student_id", enrollment.student_id)
         };
 
-        _dbHelper.ExecuteNonQuery(query, parameters);
-
-        return Ok();
+        var enrollmentId = _dbHelper.ExecuteNonQuery(query, parameters);
+        return Ok(enrollmentId);
     }
 
-    [Authorize(Roles = "instructor,admin")]
+    [Authorize]
     [HttpDelete("{id}")]
     public IActionResult DeleteCourseEnrollment(int id)
     {
-        var query = "UPDATE courseEnrollments SET deleted_at = NOW() WHERE enrollment_id = @id";
+        var query = "UPDATE CourseEnrollments SET deleted_at = @deleted_at WHERE enrollment_id = @enrollment_id";
         var parameters = new NpgsqlParameter[]
         {
-            new NpgsqlParameter("@id", id)
+            new NpgsqlParameter("@enrollment_id", id),
+            new NpgsqlParameter("@deleted_at", DateTime.Now)
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-
         return Ok();
     }
-
 }

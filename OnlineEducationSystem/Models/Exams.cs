@@ -1,29 +1,26 @@
 ﻿namespace OnlineEducationSystem.Models;
 
-public class Assignments
+public class Exams
 {
-    public int assignment_id { get; set; }
+    public int exam_id { get; set; }
     public int course_id { get; set; }
     public string title { get; set; } = string.Empty;
     public string? description { get; set; }
-    public DateTime? due_date { get; set; }
     public DateTime created_at { get; set; }
     public DateTime updated_at { get; set; }
     public DateTime? deleted_at { get; set; }
 }
 
-public class CreateAssignments
+public class CreateExams
 {
     public int course_id { get; set; }
     public string title { get; set; } = string.Empty;
     public string? description { get; set; }
-    public DateTime? due_date { get; set; }
 }
 
-public class PatchAssignments
+public class PatchExams
 {
-    public int assignment_id { get; set; }
+    public int exam_id { get; set; }
     public string title { get; set; } = string.Empty;
     public string? description { get; set; }
-    public DateTime? due_date { get; set; }
 }
