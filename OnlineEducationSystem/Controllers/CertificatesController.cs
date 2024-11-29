@@ -36,6 +36,32 @@ public class CertificatesController : ControllerBase
         return Ok(certificates);
     }
 
+    [HttpGet("student/{student_id}")]
+    public IActionResult GetCertificateForStudent(int student_id)
+    {
+        var query = "SELECT * FROM certificates WHERE student_id = @student_id";
+        var parameters = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@student_id",student_id)
+        };
+
+        var certificate = _dbHelper.ExecuteReader(query, reader => new Certificates
+        {
+            certificate_id = reader.GetInt32(0),
+            course_id = reader.GetInt32(1),
+            student_id = reader.GetInt32(2),
+            issued_date = reader.GetDateTime(3),
+            deleted_at = reader.IsDBNull(4) ? null : reader.GetDateTime(4)
+        }, parameters).FirstOrDefault();
+
+        if (certificate == null || certificate.deleted_at != null)
+        {
+            return NotFound();
+        }
+
+        return Ok(certificate);
+    }
+
     [HttpGet("{id}")]
     public IActionResult GetCertificate(int id)
     {

@@ -39,6 +39,40 @@ public class AssignmentSubmissionsController : ControllerBase
         return Ok(submissions);
     }
 
+    [HttpGet("assignment/{assignment_id}/student/{student_id}")]
+    public IActionResult GetAssignmentSubmission(int assignment_id, int student_id)
+    {
+        var query = @"
+        SELECT * FROM assignmentSubmissions
+        WHERE assignment_id = @assignment_id AND student_id = @student_id AND deleted_at IS NULL";
+
+        var parameters = new NpgsqlParameter[]
+        {
+        new NpgsqlParameter("@assignment_id", assignment_id),
+        new NpgsqlParameter("@student_id", student_id)
+        };
+
+        var submission = _dbHelper.ExecuteReader(query, reader => new AssignmentSubmissions
+        {
+            submission_id = reader.GetInt32(0),
+            assignment_id = reader.GetInt32(1),
+            student_id = reader.GetInt32(2),
+            submission_url = reader.IsDBNull(3) ? null : reader.GetString(3),
+            grade = reader.IsDBNull(4) ? null : reader.GetInt32(4),
+            submitted_at = reader.GetDateTime(5),
+            updated_at = reader.GetDateTime(6),
+            deleted_at = reader.IsDBNull(7) ? null : reader.GetDateTime(7)
+        }).FirstOrDefault();
+
+        if (submission == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(submission);
+    }
+
+
     [HttpGet("{id}")]
     public IActionResult GetAssignmentSubmission(int id)
     {

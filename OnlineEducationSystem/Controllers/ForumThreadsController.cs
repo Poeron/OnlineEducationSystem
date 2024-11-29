@@ -38,6 +38,30 @@ public class ForumThreadsController : ControllerBase
         return Ok(threads);
     }
 
+    [HttpGet("course/{course_id}")]
+    public IActionResult GetThreadsForCourse(int course_id)
+    {
+        var query = "SELECT * FROM forumThreads WHERE course_id = @course_id AND deleted_at IS NULL";
+        var parameters = new NpgsqlParameter[]
+        {
+        new NpgsqlParameter("@course_id", course_id)
+        };
+
+        var threads = _dbHelper.ExecuteReader(query, reader => new ForumThreads
+        {
+            thread_id = reader.GetInt32(0),
+            course_id = reader.GetInt32(1),
+            author_id = reader.GetInt32(2),
+            title = reader.GetString(3),
+            created_at = reader.GetDateTime(4),
+            updated_at = reader.GetDateTime(5),
+            deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
+        });
+
+        return Ok(threads);
+    }
+
+
     [HttpGet("{id}")]
     public IActionResult GetForumThread(int id)
     {

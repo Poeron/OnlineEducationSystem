@@ -38,10 +38,12 @@ public class ExamQuestionsController : ControllerBase
         return Ok(questions);
     }
 
+
+
     [HttpGet("{id}")]
     public IActionResult GetExamQuestion(int id)
     {
-        var query = "SELECT * FROM ExamQuestions WHERE question_id = @id";
+        var query = "SELECT * FROM ExamQuestions WHERE exam_id = @id";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@id", id)

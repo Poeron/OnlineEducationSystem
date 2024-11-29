@@ -37,6 +37,38 @@ public class ExamResultsController : ControllerBase
         return Ok(results);
     }
 
+    [HttpGet("exam/{exam_id}/student/{student_id}")]
+    public IActionResult GetExamResult(int exam_id, int student_id)
+    {
+        var query = @"
+        SELECT * FROM examResults
+        WHERE exam_id = @exam_id AND student_id = @student_id AND deleted_at IS NULL";
+
+        var parameters = new NpgsqlParameter[]
+        {
+        new NpgsqlParameter("@exam_id", exam_id),
+        new NpgsqlParameter("@student_id", student_id)
+        };
+
+        var result = _dbHelper.ExecuteReader(query, reader => new ExamResults
+        {
+            result_id = reader.GetInt32(0),
+            exam_id = reader.GetInt32(1),
+            student_id = reader.GetInt32(2),
+            score = reader.GetInt32(3),
+            taken_at = reader.GetDateTime(4),
+            deleted_at = reader.IsDBNull(5) ? null : reader.GetDateTime(5)
+        }).FirstOrDefault();
+
+        if (result == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
+    }
+
+
     [HttpGet("{id}")]
     public IActionResult GetExamResult(int id)
     {

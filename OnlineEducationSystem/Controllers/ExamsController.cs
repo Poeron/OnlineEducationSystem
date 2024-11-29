@@ -38,6 +38,30 @@ public class ExamsController : ControllerBase
         return Ok(exams);
     }
 
+    [HttpGet("course/{course_id}")]
+    public IActionResult GetExamsForCourse(int course_id)
+    {
+        var query = "SELECT * FROM exams WHERE course_id = @course_id AND deleted_at IS NULL";
+        var parameters = new NpgsqlParameter[]
+        {
+        new NpgsqlParameter("@course_id", course_id)
+        };
+
+        var exams = _dbHelper.ExecuteReader(query, reader => new Exams
+        {
+            exam_id = reader.GetInt32(0),
+            course_id = reader.GetInt32(1),
+            title = reader.GetString(2),
+            description = reader.IsDBNull(3) ? null : reader.GetString(3),
+            created_at = reader.GetDateTime(4),
+            updated_at = reader.GetDateTime(5),
+            deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
+        });
+
+        return Ok(exams);
+    }
+
+
     [HttpGet("{id}")]
     public IActionResult GetExam(int id)
     {

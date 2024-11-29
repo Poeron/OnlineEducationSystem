@@ -39,6 +39,36 @@ public class CoursesController : ControllerBase
         
         return Ok(courses);
     }
+
+    [HttpGet("student/{student_id}")]
+    public IActionResult GetCoursesForStudent(int student_id)
+    {
+        var query = @"
+        SELECT c.*
+        FROM courseEnrollments ce
+        INNER JOIN courses c ON ce.course_id = c.course_id
+        WHERE ce.student_id = @student_id AND c.deleted_at IS NULL";
+
+        var parameters = new NpgsqlParameter[]
+        {
+        new NpgsqlParameter("@student_id", student_id)
+        };
+
+        var courses = _dbHelper.ExecuteReader(query, reader => new Courses
+        {
+            course_id = reader.GetInt32(0),
+            instructor_id = reader.GetInt32(1),
+            title = reader.GetString(2),
+            description = reader.IsDBNull(3) ? null : reader.GetString(3),
+            created_at = reader.GetDateTime(4),
+            updated_at = reader.GetDateTime(5),
+            deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
+        });
+
+        return Ok(courses);
+    }
+
+
     [HttpGet("{id}")]
     public IActionResult GetCourse(int id)
     {
