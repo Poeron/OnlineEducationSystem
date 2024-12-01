@@ -41,11 +41,12 @@ public class AssignmentsController : ControllerBase
 
     [HttpGet("student/{student_id}")]
     public IActionResult GetAssignmentsForStudent(int student_id)
-    {
+    { 
         var query = @"
-        SELECT a.*
+        SELECT a.*, c.title as course_name
         FROM assignments a
         INNER JOIN courseEnrollments ce ON a.course_id = ce.course_id
+        INNER JOIN courses c ON a.course_id = c.course_id
         WHERE ce.student_id = @student_id AND a.deleted_at IS NULL";
 
         var parameters = new NpgsqlParameter[]
@@ -53,19 +54,19 @@ public class AssignmentsController : ControllerBase
             new NpgsqlParameter("@student_id", student_id)
         };
 
-        var assignments = _dbHelper.ExecuteReader(query, reader => new Assignments
+        var assignments = _dbHelper.ExecuteReader(query, reader => new SendAssigments
         {
             assignment_id = reader.GetInt32(0),
             course_id = reader.GetInt32(1),
-            title = reader.GetString(2),
-            description = reader.IsDBNull(3) ? null : reader.GetString(3),
-            due_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-            created_at = reader.GetDateTime(5),
-            updated_at = reader.GetDateTime(6),
-            deleted_at = reader.IsDBNull(7) ? null : reader.GetDateTime(7)
+            course_name = reader.GetString(2),
+            title = reader.GetString(3),
+            description = reader.IsDBNull(4) ? null : reader.GetString(4),
+            due_date = reader.IsDBNull(5) ? null : reader.GetDateTime(5),
+            deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
         }, parameters).Where(assignment => assignment.deleted_at == null).ToList();
 
         return Ok(assignments);
+
     }
 
     [HttpGet("Courses/{course_id}")]

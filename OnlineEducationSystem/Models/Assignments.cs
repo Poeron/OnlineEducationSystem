@@ -12,6 +12,17 @@ public class Assignments
     public DateTime? deleted_at { get; set; }
 }
 
+public class SendAssigments
+{
+    public int assignment_id { get; set; }
+    public int course_id { get; set; }
+    public string course_name { get; set; } = string.Empty;
+    public string title { get; set; } = string.Empty;
+    public string? description { get; set; }
+    public DateTime? due_date { get; set; }
+    public DateTime? deleted_at { get; set; }
+}
+
 public class CreateAssignments
 {
     public int course_id { get; set; }
