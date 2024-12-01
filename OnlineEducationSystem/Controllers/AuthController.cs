@@ -48,7 +48,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginDTO user)
     {
-        var query = "SELECT user_id,role FROM users WHERE email = @email AND password = @password";
+        var query = "SELECT user_id,role,name FROM users WHERE email = @email AND password = @password";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@email", user.email),
@@ -58,7 +58,8 @@ public class AuthController : ControllerBase
         var result = _dbHelper.ExecuteReader(query, reader => new 
         {
             user_id = reader.GetInt32(0),
-            role = reader.GetString(1)
+            role = reader.GetString(1),
+            name = reader.GetString(2)
         }, parameters).FirstOrDefault();
 
         if (result == null)
@@ -69,7 +70,8 @@ public class AuthController : ControllerBase
         var token = GenerateToken(new Users
         {
             user_id = result.user_id,
-            role = result.role
+            role = result.role,
+            name = result.name,
         });
 
         return Ok(new { Token = token, Role = result.role });
