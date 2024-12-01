@@ -43,7 +43,7 @@ public class AssignmentsController : ControllerBase
     public IActionResult GetAssignmentsForStudent(int student_id)
     { 
         var query = @"
-        SELECT a.*, c.title as course_name
+        SELECT  c.title as course_name, a.*
         FROM assignments a
         INNER JOIN courseEnrollments ce ON a.course_id = ce.course_id
         INNER JOIN courses c ON a.course_id = c.course_id
@@ -56,9 +56,9 @@ public class AssignmentsController : ControllerBase
 
         var assignments = _dbHelper.ExecuteReader(query, reader => new SendAssigments
         {
-            assignment_id = reader.GetInt32(0),
-            course_id = reader.GetInt32(1),
-            course_name = reader.GetString(2),
+            course_name = reader.GetString(0),
+            assignment_id = reader.GetInt32(1),
+            course_id = reader.GetInt32(2),
             title = reader.GetString(3),
             description = reader.IsDBNull(4) ? null : reader.GetString(4),
             due_date = reader.IsDBNull(5) ? null : reader.GetDateTime(5),
