@@ -62,7 +62,7 @@ public class CourseEnrollmentsController : ControllerBase
         return Ok(enrollment);
     }
 
-    [Authorize]
+    [Authorize(Roles ="student")]
     [HttpPost]
     public IActionResult CreateCourseEnrollment([FromBody] CreateCourseEnrollments enrollment)
     {
@@ -77,7 +77,7 @@ public class CourseEnrollmentsController : ControllerBase
         return Ok(enrollmentId);
     }
 
-    [Authorize]
+    [Authorize(Roles = "student, admin")]
     [HttpDelete("{id}")]
     public IActionResult DeleteCourseEnrollment(int id)
     {
