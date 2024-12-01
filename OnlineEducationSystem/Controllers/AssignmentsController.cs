@@ -42,12 +42,12 @@ public class AssignmentsController : ControllerBase
     [HttpGet("student/{student_id}")]
     public IActionResult GetAssignmentsForStudent(int student_id)
     { 
-        var query = @"
-        SELECT  c.title as course_name, a.*
-        FROM assignments a
-        INNER JOIN courseEnrollments ce ON a.course_id = ce.course_id
-        INNER JOIN courses c ON a.course_id = c.course_id
-        WHERE ce.student_id = @student_id AND a.deleted_at IS NULL";
+var query = @"
+    SELECT c.title as course_name, a.*
+    FROM assignments a
+    INNER JOIN courseEnrollments ce ON a.course_id = ce.course_id
+    INNER JOIN courses c ON a.course_id = c.course_id
+    WHERE ce.student_id = @student_id AND a.deleted_at IS NULL";
 
         var parameters = new NpgsqlParameter[]
         {
@@ -62,7 +62,9 @@ public class AssignmentsController : ControllerBase
             title = reader.GetString(3),
             description = reader.IsDBNull(4) ? null : reader.GetString(4),
             due_date = reader.IsDBNull(5) ? null : reader.GetDateTime(5),
-            deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
+            created_at = reader.GetDateTime(6),
+            updated_at = reader.GetDateTime(7),
+            deleted_at = reader.IsDBNull(8) ? null : reader.GetDateTime(8)
         }, parameters).Where(assignment => assignment.deleted_at == null).ToList();
 
         return Ok(assignments);
