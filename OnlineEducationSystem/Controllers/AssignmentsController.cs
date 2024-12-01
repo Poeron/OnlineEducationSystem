@@ -39,6 +39,61 @@ public class AssignmentsController : ControllerBase
         return Ok(assignments);
     }
 
+    [HttpGet("Courses/{course_id}")]
+    public IActionResult GetAssignmentsForCourse(int course_id)
+    {
+        var query = "SELECT * FROM assignments WHERE course_id = @course_id";
+        var parameters = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@course_id", course_id)
+        };
+
+        var assignments = _dbHelper.ExecuteReader(query, reader => new Assignments
+        {
+            assignment_id = reader.GetInt32(0),
+            course_id = reader.GetInt32(1),
+            title = reader.GetString(2),
+            description = reader.IsDBNull(3) ? null : reader.GetString(3),
+            due_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
+            created_at = reader.GetDateTime(5),
+            updated_at = reader.GetDateTime(6),
+            deleted_at = reader.IsDBNull(7) ? null : reader.GetDateTime(7)
+        }, parameters).Where(assignment => assignment.deleted_at == null).ToList();
+
+        return Ok(assignments);
+    }
+
+    [HttpGet("Courses/{course_id}/student/{student_id}")]
+    public IActionResult GetAssignmentsForCourseAndStudent(int course_id, int student_id)
+    {
+        var query = @"
+        SELECT a.*
+        FROM assignments a
+        INNER JOIN courseEnrollments ce ON a.course_id = ce.course_id
+        WHERE a.course_id = @course_id AND ce.student_id = @student_id AND a.deleted_at IS NULL";
+
+        var parameters = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@course_id", course_id),
+            new NpgsqlParameter("@student_id", student_id)
+        };
+
+        var assignments = _dbHelper.ExecuteReader(query, reader => new Assignments
+        {
+            assignment_id = reader.GetInt32(0),
+            course_id = reader.GetInt32(1),
+            title = reader.GetString(2),
+            description = reader.IsDBNull(3) ? null : reader.GetString(3),
+            due_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
+            created_at = reader.GetDateTime(5),
+            updated_at = reader.GetDateTime(6),
+            deleted_at = reader.IsDBNull(7) ? null : reader.GetDateTime(7)
+        }, parameters).Where(assignment => assignment.deleted_at == null).ToList();
+
+        return Ok(assignments);
+    }
+
+
     [HttpGet("{id}")]
     public IActionResult GetAssignment(int id)
     {

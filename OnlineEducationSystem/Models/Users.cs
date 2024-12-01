@@ -25,3 +25,18 @@ public class RegisterDTO
     public string role { get; set; } = string.Empty;
     public string name { get; set; } = string.Empty;
 }
+
+public class CreateUser
+{
+    public string email { get; set; } = string.Empty;
+    public string password { get; set; } = string.Empty; // Passwords should be hashed
+    public string role { get; set; } = "student"; // Default role is student
+    public string name { get; set; } = string.Empty;
+}
+
+public class UpdateUser
+{
+    public int user_id { get; set; }
+    public string name { get; set; } = string.Empty;
+    public string role { get; set; } = "student"; // Optional role change
+}

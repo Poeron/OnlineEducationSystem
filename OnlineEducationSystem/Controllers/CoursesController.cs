@@ -68,6 +68,29 @@ public class CoursesController : ControllerBase
         return Ok(courses);
     }
 
+    [HttpGet("instructor/{instructor_id}")]
+    public IActionResult GetCoursesForInstructor(int instructor_id)
+    {
+        var query = "SELECT * FROM courses WHERE instructor_id = @instructor_id";
+        var parameters = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@instructor_id", instructor_id)
+        };
+
+        var courses = _dbHelper.ExecuteReader(query, reader => new Courses
+        {
+            course_id = reader.GetInt32(0),
+            instructor_id = reader.GetInt32(1),
+            title = reader.GetString(2),
+            description = reader.IsDBNull(3) ? null : reader.GetString(3),
+            created_at = reader.GetDateTime(4),
+            updated_at = reader.GetDateTime(5),
+            deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
+        }, parameters);
+
+        return Ok(courses);
+    }
+
 
     [HttpGet("{id}")]
     public IActionResult GetCourse(int id)
