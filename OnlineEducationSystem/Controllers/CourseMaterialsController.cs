@@ -39,6 +39,30 @@ public class CourseMaterialsController : ControllerBase
         return Ok(materials);
     }
 
+    [HttpGet("Course/{id}")]
+    public IActionResult GetCourseMaterialsByCourse(int id)
+    {
+        var query = "SELECT * FROM CourseMaterials WHERE course_id = @id";
+        var parameters = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@id", id)
+        };
+
+        var materials = _dbHelper.ExecuteReader(query, reader => new CourseMaterials
+        {
+            material_id = reader.GetInt32(0),
+            course_id = reader.GetInt32(1),
+            title = reader.GetString(2),
+            content_type = reader.GetString(3),
+            content_url = reader.GetString(4),
+            created_at = reader.GetDateTime(5),
+            updated_at = reader.GetDateTime(6),
+            deleted_at = reader.IsDBNull(7) ? null : reader.GetDateTime(7)
+        }, parameters).Where(material => material.deleted_at == null).ToList();
+
+        return Ok(materials);
+    }
+
     [HttpGet("{id}")]
     public IActionResult GetCourseMaterial(int id)
     {
