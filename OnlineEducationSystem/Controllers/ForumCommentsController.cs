@@ -70,10 +70,10 @@ public class ForumCommentsController : ControllerBase
     [HttpPost]
     public IActionResult CreateForumComment([FromBody] CreateForumComments comment)
     {
-        var query = "INSERT INTO ForumComments (thread_id, author_id, comment_text) VALUES (@thread_id, @author_id, @comment_text)";
+        var query = "INSERT INTO ForumComments (thread_id, author_id, comment_text) SELECT thread_id, @author_id, @comment_text FROM forumThreads WHERE course_id = @course_id";
         var parameters = new NpgsqlParameter[]
         {
-            new NpgsqlParameter("@thread_id", comment.thread_id),
+            new NpgsqlParameter("@thread_id", comment.course_id),
             new NpgsqlParameter("@author_id", comment.author_id),
             new NpgsqlParameter("@comment_text", comment.comment_text)
         };

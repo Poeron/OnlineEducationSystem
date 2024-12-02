@@ -13,8 +13,8 @@ public class ForumComments
 
 public class CreateForumComments
 {
-    public int thread_id { get; set; }
-    public int? author_id { get; set; } // Optional
+    public int course_id { get; set; }
+    public int author_id { get; set; }
     public string comment_text { get; set; } = string.Empty;
 }
 
