@@ -37,16 +37,16 @@ public class ExamResultsController : ControllerBase
         return Ok(results);
     }
 
-    [HttpGet("exam/{exam_id}/student/{student_id}")]
-    public IActionResult GetExamResult(int exam_id, int student_id)
+    [HttpGet("course/{course_id}/student/{student_id}")]
+    public IActionResult GetExamResult(int course_id, int student_id)
     {
         var query = @"
-        SELECT * FROM examResults
-        WHERE exam_id = @exam_id AND student_id = @student_id AND deleted_at IS NULL";
+        SELECT er.* FROM examResults er INNER JOIN exams e ON er.exam_id = e.exam_id
+        WHERE e.course_id = @course_id AND er.student_id = @student_id AND er.deleted_at IS NULL";
 
         var parameters = new NpgsqlParameter[]
         {
-        new NpgsqlParameter("@exam_id", exam_id),
+        new NpgsqlParameter("@exam_id", course_id),
         new NpgsqlParameter("@student_id", student_id)
         };
 
@@ -96,17 +96,16 @@ public class ExamResultsController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "student")]
     [HttpPost]
     public IActionResult CreateExamResult([FromBody] CreateExamResults result)
     {
-        var query = "INSERT INTO ExamResults (exam_id, student_id, score, taken_at) VALUES (@exam_id, @student_id, @score, @taken_at)";
+        var query = "INSERT INTO ExamResults (exam_id, student_id, score, taken_at) VALUES (@exam_id, @student_id, @score, NOW())";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@exam_id", result.exam_id),
             new NpgsqlParameter("@student_id", result.student_id),
-            new NpgsqlParameter("@score", result.score),
-            new NpgsqlParameter("@taken_at", result.taken_at)
+            new NpgsqlParameter("@score", result.score)
         };
 
         var resultId = _dbHelper.ExecuteNonQuery(query, parameters);
