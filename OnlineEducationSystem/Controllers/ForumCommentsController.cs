@@ -27,13 +27,33 @@ public class ForumCommentsController : ControllerBase
         var comments = _dbHelper.ExecuteReader(query, reader => new ForumComments
         {
             comment_id = reader.GetInt32(0),
-            thread_id = reader.GetInt32(1),
+            course_id = reader.GetInt32(1),
             author_id = reader.IsDBNull(2) ? null : reader.GetInt32(2),
             comment_text = reader.GetString(3),
             created_at = reader.GetDateTime(4),
             updated_at = reader.GetDateTime(5),
             deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
         }).Where(comment => comment.deleted_at == null).ToList();
+
+        return Ok(comments);
+    }
+
+    [HttpGet("Course/{course_id}")]
+    public IActionResult GetCommentsForCourse(int course_id)
+    {
+        var query = "SELECT fc.comment_id, fc.comment_text, fc.created_at, u.name FROM ForumComments fc INNER JOIN Users u ON u.user_id = fc.author_id  WHERE course_id = @course_id AND fc.deleted_at IS NULL ORDER BY fc.created_at ASC";
+        var parameters = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@course_id", course_id)
+        };
+
+        var comments = _dbHelper.ExecuteReader(query, reader => new ViewComments
+        {
+            comment_id = reader.GetInt32(0),
+            comment_text = reader.GetString(1),
+            created_at = reader.GetDateTime(2),
+            author_name = reader.GetString(3)
+        }, parameters);
 
         return Ok(comments);
     }
@@ -50,7 +70,7 @@ public class ForumCommentsController : ControllerBase
         var comment = _dbHelper.ExecuteReader(query, reader => new ForumComments
         {
             comment_id = reader.GetInt32(0),
-            thread_id = reader.GetInt32(1),
+            course_id = reader.GetInt32(1),
             author_id = reader.IsDBNull(2) ? null : reader.GetInt32(2),
             comment_text = reader.GetString(3),
             created_at = reader.GetDateTime(4),
@@ -70,10 +90,10 @@ public class ForumCommentsController : ControllerBase
     [HttpPost]
     public IActionResult CreateForumComment([FromBody] CreateForumComments comment)
     {
-        var query = "INSERT INTO ForumComments (thread_id, author_id, comment_text) SELECT thread_id, @author_id, @comment_text FROM forumThreads WHERE course_id = @course_id";
+        var query = "INSERT INTO ForumComments (course_id, author_id, comment_text) VALUES (@course_id, @author_id, @comment_text)";
         var parameters = new NpgsqlParameter[]
         {
-            new NpgsqlParameter("@thread_id", comment.course_id),
+            new NpgsqlParameter("@course_id", comment.course_id),
             new NpgsqlParameter("@author_id", comment.author_id),
             new NpgsqlParameter("@comment_text", comment.comment_text)
         };
