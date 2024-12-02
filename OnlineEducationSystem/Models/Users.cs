@@ -40,3 +40,11 @@ public class UpdateUser
     public string name { get; set; } = string.Empty;
     public string role { get; set; } = "student"; // Optional role change
 }
+
+public class Students
+{
+    public int user_id { get; set; }
+    public string name { get; set; } = string.Empty;
+    public string email { get; set; } = string.Empty;
+    public DateTime enrollment_date { get; set; }
+}
