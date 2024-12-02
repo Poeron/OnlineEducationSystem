@@ -38,6 +38,29 @@ public class QuestionOptionsController : ControllerBase
         return Ok(options);
     }
 
+    [HttpGet("question/{question_id}")]
+    public IActionResult GetQuestionOptionsForQuestion(int question_id)
+    {
+        var query = "SELECT * FROM QuestionOptions WHERE question_id = @question_id";
+        var parameters = new NpgsqlParameter[]
+        {
+         new NpgsqlParameter("@question_id", question_id)
+        };
+
+        var options = _dbHelper.ExecuteReader(query, reader => new QuestionOptions
+        {
+            option_id = reader.GetInt32(0),
+            question_id = reader.GetInt32(1),
+            option_text = reader.GetString(2),
+            is_correct = reader.GetBoolean(3),
+            created_at = reader.GetDateTime(4),
+            updated_at = reader.GetDateTime(5),
+            deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
+        }, parameters).Where(option => option.deleted_at == null).ToList();
+
+        return Ok(options);
+    }
+
     [HttpGet("{id}")]
     public IActionResult GetQuestionOption(int id)
     {
