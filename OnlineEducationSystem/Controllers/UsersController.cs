@@ -105,7 +105,7 @@ public class UsersController : ControllerBase
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok();
+        return Ok(new { message = "Güncelleme Başarılı" });
     }
 
     // DELETE: api/Users/{id}
@@ -121,6 +121,6 @@ public class UsersController : ControllerBase
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok();
+        return Ok(new {message = "Kayıt Başarıyla Silindi."});
     }
 }

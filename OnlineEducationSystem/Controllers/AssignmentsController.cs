@@ -186,7 +186,7 @@ var query = @"
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok();
+        return Ok(new { message = "Güncelleme Başarılı" });
     }
 
     [Authorize(Roles = "instructor,admin")]
@@ -201,6 +201,6 @@ var query = @"
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok();
+        return Ok(new { message = "Kayıt Başarıyla Silindi." });
     }
 }

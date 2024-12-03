@@ -114,7 +114,7 @@ public class ForumCommentsController : ControllerBase
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok();
+        return Ok(new { message = "Güncelleme Başarılı" });
     }
 
     [Authorize(Roles = "admin")]
@@ -129,6 +129,6 @@ public class ForumCommentsController : ControllerBase
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok();
+        return Ok(new { message = "Kayıt Başarıyla Silindi." });
     }
 }

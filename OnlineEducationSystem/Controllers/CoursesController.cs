@@ -174,7 +174,7 @@ public class CoursesController : ControllerBase
 
         _dbHelper.ExecuteNonQuery(query, parameters);
 
-        return Ok();
+        return Ok(new { message = "Güncelleme Başarılı" });
     }
 
     [Authorize(Roles = "instructor,admin")]
@@ -190,6 +190,6 @@ public class CoursesController : ControllerBase
 
         _dbHelper.ExecuteNonQuery(query, parameters);
 
-        return Ok();
+        return Ok(new { message = "Kayıt Başarıyla Silindi." });
     }
 }

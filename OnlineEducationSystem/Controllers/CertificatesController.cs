@@ -116,6 +116,6 @@ public class CertificatesController : ControllerBase
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok();
+        return Ok(new { message = "Kayıt Başarıyla Silindi." });
     }
 }

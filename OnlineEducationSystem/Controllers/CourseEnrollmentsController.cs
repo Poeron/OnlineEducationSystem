@@ -89,6 +89,6 @@ public class CourseEnrollmentsController : ControllerBase
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok(new { message = "Success" });
+        return Ok(new { message = "Kayıt Başarıyla Silindi." });
     }
 }

@@ -92,6 +92,6 @@ public class AuthController : ControllerBase
 
         _dbHelper.ExecuteNonQuery(query, parameters);
 
-        return Ok();
+        return Ok(new { message = "Kayıt Başarıyla Oluşturuldu." });
     }
 }
