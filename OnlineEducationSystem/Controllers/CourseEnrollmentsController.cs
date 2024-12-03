@@ -77,7 +77,7 @@ public class CourseEnrollmentsController : ControllerBase
         return Ok(enrollmentId);
     }
 
-    [Authorize(Roles = "student, admin")]
+    [Authorize]
     [HttpDelete("{id}")]
     public IActionResult DeleteCourseEnrollment(int id)
     {
@@ -89,6 +89,6 @@ public class CourseEnrollmentsController : ControllerBase
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok();
+        return Ok(new { message = "Success" });
     }
 }

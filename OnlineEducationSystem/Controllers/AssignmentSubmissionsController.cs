@@ -39,6 +39,45 @@ public class AssignmentSubmissionsController : ControllerBase
         return Ok(submissions);
     }
 
+    [HttpGet("assignment/{assignment_id}")]
+    public IActionResult GetAssignmentSubmissionsForAssignment(int assignment_id)
+    {
+        var query = "SELECT  u.name, a.submission_id, a.student_id, a.submission_url, a.grade, a.submitted_at FROM AssignmentSubmissions a INNER JOIN Users u ON u.user_id = a.student_id WHERE a.assignment_id = @assignment_id AND a.deleted_at IS NULL";
+        var parameters = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@assignment_id", assignment_id)
+        };
+
+        var submissions = _dbHelper.ExecuteReader(query, reader => new ViewAssignmentSubmission
+        {
+            name = reader.GetString(0),
+            submission_id = reader.GetInt32(1),
+            student_id = reader.GetInt32(2),
+            submission_url = reader.IsDBNull(3) ? null : reader.GetString(3),
+            grade = reader.IsDBNull(4) ? null : reader.GetInt32(4),
+            submitted_at = reader.GetDateTime(5),
+        }, parameters).ToList();
+
+        return Ok(submissions);
+    }
+
+    [HttpGet("student/{student_id}")]
+    public IActionResult GetAssignmentSubmissionsForStudent(int student_id)
+    {
+        var query = "SELECT assignment_id FROM AssignmentSubmissions WHERE student_id = @student_id AND deleted_at IS NULL";
+        var parameters = new NpgsqlParameter[]
+        {
+        new NpgsqlParameter("@student_id", student_id)
+        };
+
+        var submissions = _dbHelper.ExecuteReader(query, reader => new SendAssigments
+        {
+            assignment_id = reader.GetInt32(0)
+        }, parameters).ToList();
+
+        return Ok(submissions);
+    }
+
     [HttpGet("assignment/{assignment_id}/student/{student_id}")]
     public IActionResult GetAssignmentSubmission(int assignment_id, int student_id)
     {
@@ -130,7 +169,7 @@ public class AssignmentSubmissionsController : ControllerBase
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok();
+        return Ok(new {message="Not Güncellendi."});
     }
 
     [Authorize(Roles = "admin,instructor")]

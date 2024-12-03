@@ -41,11 +41,11 @@ public class CoursesController : ControllerBase
     }
 
     [Authorize(Roles ="instructor")]
-    [HttpGet("courses/{course_id}/students")]
+    [HttpGet("{course_id}/students")]
     public IActionResult GetStudentsForCourse(int course_id)
     {
         var query = @"
-        SELECT u.user_id, u.name, u.email, ce.enrollment_date FROM users u INNER JOIN courseEnrollments ce ON u.user_id = ce.student_id WHERE ce.course_id = @course_id";
+        SELECT u.user_id, u.name, u.email, ce.enrollment_date, ce.enrollment_id FROM users u INNER JOIN courseEnrollments ce ON u.user_id = ce.student_id WHERE ce.course_id = @course_id AND ce.deleted_at IS NULL";
 
         var parameters = new NpgsqlParameter[]
         {
@@ -57,7 +57,8 @@ public class CoursesController : ControllerBase
             user_id = reader.GetInt32(0),
             name = reader.GetString(1),
             email = reader.GetString(2),
-            enrollment_date = reader.GetDateTime(3)
+            enrollment_date = reader.GetDateTime(3),
+            enrollment_id = reader.GetInt32(4)
         });
 
         return Ok(students);
