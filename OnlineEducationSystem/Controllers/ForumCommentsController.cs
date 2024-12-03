@@ -117,7 +117,7 @@ public class ForumCommentsController : ControllerBase
         return Ok();
     }
 
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "instructor,admin")]
     [HttpDelete("{id}")]
     public IActionResult DeleteForumComment(int id)
     {
@@ -129,6 +129,6 @@ public class ForumCommentsController : ControllerBase
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok();
+        return Ok(new { message = "Mesaj Silindi" });
     }
 }
