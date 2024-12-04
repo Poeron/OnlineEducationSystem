@@ -46,7 +46,7 @@ public class ExamResultsController : ControllerBase
 
         var parameters = new NpgsqlParameter[]
         {
-        new NpgsqlParameter("@exam_id", course_id),
+        new NpgsqlParameter("@course_id", course_id),
         new NpgsqlParameter("@student_id", student_id)
         };
 
@@ -58,7 +58,7 @@ public class ExamResultsController : ControllerBase
             score = reader.GetInt32(3),
             taken_at = reader.GetDateTime(4),
             deleted_at = reader.IsDBNull(5) ? null : reader.GetDateTime(5)
-        }).FirstOrDefault();
+        },parameters).FirstOrDefault();
 
         if (result == null)
         {

@@ -59,7 +59,7 @@ public class CoursesController : ControllerBase
             email = reader.GetString(2),
             enrollment_date = reader.GetDateTime(3),
             enrollment_id = reader.GetInt32(4)
-        });
+        }, parameters);
 
         return Ok(students);
     }
@@ -87,7 +87,7 @@ public class CoursesController : ControllerBase
             created_at = reader.GetDateTime(4),
             updated_at = reader.GetDateTime(5),
             deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
-        });
+        },parameters);
 
         return Ok(courses);
     }

@@ -2,6 +2,7 @@
 
 public class Courses
 {
+    public int student_id { get; set; }
     public int course_id { get; set; }
     public int instructor_id { get; set; }
     public string title { get; set; } = string.Empty;
