@@ -72,7 +72,7 @@ public class ExamQuestionsController : ControllerBase
     [HttpPost]
     public IActionResult CreateExamQuestion([FromBody] CreateExamQuestions question)
     {
-        var query = "INSERT INTO ExamQuestions (exam_id, question_text, question_type) VALUES (@exam_id, @question_text, @question_type)";
+        var query = "INSERT INTO ExamQuestions (exam_id, question_text, question_type) VALUES (@exam_id, @question_text, @question_type) RETURNING question_id";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@exam_id", question.exam_id),
@@ -80,8 +80,12 @@ public class ExamQuestionsController : ControllerBase
             new NpgsqlParameter("@question_type", question.question_type)
         };
 
-        var questionId = _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok(questionId);
+        var insertedQuestion = _dbHelper.ExecuteReader(query, reader => new
+        {
+            question_id = reader.GetInt32(0) // RETURNING yalnızca question_id döndürüyor
+        }, parameters).FirstOrDefault();
+
+        return Ok(insertedQuestion!.question_id);
     }
 
     [Authorize(Roles = "instructor, admin")]

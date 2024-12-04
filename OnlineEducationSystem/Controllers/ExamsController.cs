@@ -94,7 +94,7 @@ public class ExamsController : ControllerBase
     [HttpPost]
     public IActionResult CreateExam([FromBody] CreateExams exam)
     {
-        var query = "INSERT INTO exams (course_id, title, description) VALUES (@course_id, @title, @description)";
+        var query = "INSERT INTO exams (course_id, title, description) VALUES (@course_id, @title, @description) RETURNING exam_id";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@course_id", exam.course_id),
@@ -102,8 +102,11 @@ public class ExamsController : ControllerBase
             new NpgsqlParameter("@description", exam.description)
         };
 
-        var examId = _dbHelper.ExecuteNonQuery(query, parameters);
-        return Ok(examId);
+        var insertedExam = _dbHelper.ExecuteReader(query, reader => new
+        {
+            exam_id = reader.GetInt32(0) // RETURNING yalnızca question_id döndürüyor
+        }, parameters).FirstOrDefault();
+        return Ok(insertedExam!.exam_id);
     }
 
     [Authorize(Roles = "instructor, admin")]
