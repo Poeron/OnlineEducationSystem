@@ -68,7 +68,7 @@ public class ExamQuestionsController : ControllerBase
         return Ok(question);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "instructor, admin")]
     [HttpPost]
     public IActionResult CreateExamQuestion([FromBody] CreateExamQuestions question)
     {
@@ -84,7 +84,7 @@ public class ExamQuestionsController : ControllerBase
         return Ok(questionId);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "instructor, admin")]
     [HttpPatch]
     public IActionResult UpdateExamQuestion([FromBody] PatchExamQuestions question)
     {

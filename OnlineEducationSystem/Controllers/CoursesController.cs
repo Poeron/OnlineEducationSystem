@@ -144,7 +144,7 @@ public class CoursesController : ControllerBase
         return Ok(course);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "instructor, admin")]
     [HttpPost]
     public IActionResult CreateCourse([FromBody] CreateCourses course)
     {

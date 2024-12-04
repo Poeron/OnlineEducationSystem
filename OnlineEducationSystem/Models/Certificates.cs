@@ -13,5 +13,12 @@ public class CreateCertificates
 {
     public int course_id { get; set; }
     public int student_id { get; set; }
-    public DateTime issued_date { get; set; } = DateTime.Now; // Default to current date
+}
+public class UpdateCertificates
+{
+
+   public int certificate_id { get; set; }
+    public int course_id { get; set; }
+    public int student_id { get; set; }
+    public DateTime issued_date { get; set; }
 }

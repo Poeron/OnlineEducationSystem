@@ -62,7 +62,7 @@ public class CourseEnrollmentsController : ControllerBase
         return Ok(enrollment);
     }
 
-    [Authorize(Roles ="student")]
+    [Authorize(Roles = "student, admin")]
     [HttpPost]
     public IActionResult CreateCourseEnrollment([FromBody] CreateCourseEnrollments enrollment)
     {

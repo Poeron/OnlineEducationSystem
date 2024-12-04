@@ -96,7 +96,7 @@ public class ExamResultsController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "student")]
+    [Authorize(Roles = "student, admin")]
     [HttpPost]
     public IActionResult CreateExamResult([FromBody] CreateExamResults result)
     {
@@ -112,7 +112,7 @@ public class ExamResultsController : ControllerBase
         return Ok(resultId);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "instructor, admin")]
     [HttpPatch]
     public IActionResult UpdateExamResult([FromBody] PatchExamResults result)
     {

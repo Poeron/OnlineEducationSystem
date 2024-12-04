@@ -95,13 +95,13 @@ public class UsersController : ControllerBase
     [HttpPatch]
     public IActionResult UpdateUser([FromBody] UpdateUser user)
     {
-        var query = "UPDATE Users SET name = @name, role = @role, updated_at = @updated_at WHERE user_id = @user_id";
+        var query = "UPDATE Users SET name = @name, role = @role, email = @email WHERE user_id = @user_id";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@user_id", user.user_id),
             new NpgsqlParameter("@name", user.name),
-            new NpgsqlParameter("@role", user.role),
-            new NpgsqlParameter("@updated_at", DateTime.Now)
+            new NpgsqlParameter("@email", user.email),
+            new NpgsqlParameter("@role", user.role)
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);

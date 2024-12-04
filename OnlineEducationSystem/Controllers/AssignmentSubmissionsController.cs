@@ -157,8 +157,24 @@ public class AssignmentSubmissionsController : ControllerBase
         return Ok(submissionId);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "admin,instructor")]
     [HttpPatch]
+    public IActionResult UpdateAssignmentSubmission([FromBody] UpdateAssignmentSubmissions submission)
+    {
+        var query = "UPDATE AssignmentSubmissions SET submission_url = @submission_url, grade = @grade WHERE submission_id = @submission_id";
+        var parameters = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@submission_id", submission.submission_id),
+            new NpgsqlParameter("@grade", submission.grade),
+            new NpgsqlParameter("@submission_url", submission.submission_url)
+        };
+
+        _dbHelper.ExecuteNonQuery(query, parameters);
+        return Ok(new { message = "Güncelleme Başarılı" });
+    }
+
+    [Authorize(Roles = "instructor, admin")]
+    [HttpPatch("grade")]
     public IActionResult UpdateAssignmentSubmission([FromBody] PatchAssignmentSubmissions submission)
     {
         var query = "UPDATE AssignmentSubmissions SET grade = @grade WHERE submission_id = @submission_id";

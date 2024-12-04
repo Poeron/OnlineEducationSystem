@@ -92,7 +92,7 @@ public class CourseMaterialsController : ControllerBase
         return Ok(material);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "instructor, admin")]
     [HttpPost]
     public IActionResult CreateCourseMaterial([FromBody] CreateCourseMaterials material)
     {
@@ -109,7 +109,7 @@ public class CourseMaterialsController : ControllerBase
         return Ok(materialId);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "instructor, admin")]
     [HttpPatch]
     public IActionResult UpdateCourseMaterial([FromBody] PatchCourseMaterials material)
     {

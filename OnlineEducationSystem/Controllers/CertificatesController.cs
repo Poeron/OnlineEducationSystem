@@ -92,17 +92,33 @@ public class CertificatesController : ControllerBase
     [HttpPost]
     public IActionResult CreateCertificate([FromBody] CreateCertificates certificate)
     {
-        var query = "INSERT INTO certificates (course_id, student_id, issued_date) VALUES (@course_id, @student_id, @issued_date)";
+        var query = "INSERT INTO certificates (course_id, student_id) VALUES (@course_id, @student_id)";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@course_id", certificate.course_id),
             new NpgsqlParameter("@student_id", certificate.student_id),
-            new NpgsqlParameter("@issued_date", certificate.issued_date)
         };
 
         var certificateId = _dbHelper.ExecuteNonQuery(query, parameters);
         return Ok(certificateId);
     }
+
+    [Authorize(Roles = "instructor,admin")]
+    [HttpPatch]
+    public IActionResult UpdateCertificate([FromBody] UpdateCertificates certificate)
+    {
+        var query = "UPDATE certificates SET course_id = @course_id, student_id = @student_id WHERE certificate_id = @certificate_id";
+        var parameters = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@certificate_id", certificate.certificate_id),
+            new NpgsqlParameter("@course_id", certificate.course_id),
+            new NpgsqlParameter("@student_id", certificate.student_id)
+        };
+
+        _dbHelper.ExecuteNonQuery(query, parameters);
+        return Ok(new { message = "Kayıt Başarıyla Güncellendi." });
+    }
+
 
     [Authorize(Roles = "admin")]
     [HttpDelete("{id}")]

@@ -89,7 +89,7 @@ public class QuestionOptionsController : ControllerBase
         return Ok(option);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "instructor, admin")]
     [HttpPost]
     public IActionResult CreateQuestionOption([FromBody] CreateQuestionOptions option)
     {
@@ -105,7 +105,7 @@ public class QuestionOptionsController : ControllerBase
         return Ok(optionId);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "instructor, admin")]
     [HttpPatch]
     public IActionResult UpdateQuestionOption([FromBody] PatchQuestionOptions option)
     {

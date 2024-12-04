@@ -117,7 +117,7 @@ public class ForumCommentsController : ControllerBase
         return Ok(new { message = "Güncelleme Başarılı" });
     }
 
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "instructor, admin")]
     [HttpDelete("{id}")]
     public IActionResult DeleteForumComment(int id)
     {

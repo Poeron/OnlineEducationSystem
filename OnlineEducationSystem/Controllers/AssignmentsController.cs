@@ -155,7 +155,7 @@ var query = @"
         return Ok(assignment);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "instructor, admin")]
     [HttpPost]
     public IActionResult CreateAssignment([FromBody] CreateAssignments assignment)
     {
@@ -172,7 +172,7 @@ var query = @"
         return Ok(assignmentId);
     }
 
-    [Authorize(Roles = "instructor")]
+    [Authorize(Roles = "instructor, admin")]
     [HttpPatch]
     public IActionResult UpdateAssignment([FromBody] PatchAssignments assignment)
     {

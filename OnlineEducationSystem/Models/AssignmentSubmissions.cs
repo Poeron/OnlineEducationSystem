@@ -35,6 +35,13 @@ public class CreateAssignmentSubmissions
     public DateTime? submitted_at { get; set; } = DateTime.Now;
 }
 
+public class UpdateAssignmentSubmissions
+{
+    public int submission_id { get; set; }
+    public string? submission_url { get; set; }
+    public int? grade { get; set; }
+}
+
 public class PatchAssignmentSubmissions
 {
     public int submission_id { get; set; }
