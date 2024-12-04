@@ -43,13 +43,13 @@ public class ExamQuestionsController : ControllerBase
     [HttpGet("{id}")]
     public IActionResult GetExamQuestion(int id)
     {
-        var query = "SELECT * FROM ExamQuestions WHERE exam_id = @id";
+        var query = "SELECT * FROM ExamQuestions WHERE exam_id = @id AND deleted_at IS NULL";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@id", id)
         };
 
-        var question = _dbHelper.ExecuteReader(query, reader => new ExamQuestions
+        var questions = _dbHelper.ExecuteReader(query, reader => new ExamQuestions
         {
             question_id = reader.GetInt32(0),
             exam_id = reader.GetInt32(1),
@@ -58,14 +58,10 @@ public class ExamQuestionsController : ControllerBase
             created_at = reader.GetDateTime(4),
             updated_at = reader.GetDateTime(5),
             deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
-        }, parameters).FirstOrDefault();
+        }, parameters).ToList();
 
-        if (question == null || question.deleted_at != null)
-        {
-            return NotFound();
-        }
 
-        return Ok(question);
+        return Ok(questions);
     }
 
     [Authorize(Roles = "instructor, admin")]
