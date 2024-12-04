@@ -93,7 +93,7 @@ public class QuestionOptionsController : ControllerBase
     [HttpPost]
     public IActionResult CreateQuestionOption([FromBody] CreateQuestionOptions option)
     {
-        var query = "INSERT INTO QuestionOptions (question_id, option_text, is_correct) VALUES (@question_id, @option_text, @is_correct)";
+        var query = "INSERT INTO QuestionOptions (question_id, option_text, is_correct) VALUES (@question_id, @option_text, @is_correct) RETURNING option_id";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@question_id", option.question_id),
