@@ -56,7 +56,7 @@ public class ExamsController : ControllerBase
             created_at = reader.GetDateTime(4),
             updated_at = reader.GetDateTime(5),
             deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
-        },parameters);
+        },parameters).FirstOrDefault();
 
         return Ok(exams);
     }
