@@ -13,6 +13,7 @@ public class ViewCertificate
 {
     public int certificate_id { get; set; }
     public string course_title { get; set; } = String.Empty;
+    public string instructor_name { get; set; } = String.Empty;
     public string student_name { get; set; } = String.Empty;
     public DateTime issued_date { get; set; }
 }

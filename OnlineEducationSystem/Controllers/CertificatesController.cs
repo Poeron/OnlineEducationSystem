@@ -39,10 +39,11 @@ public class CertificatesController : ControllerBase
     [HttpGet("student/{student_id}")]
     public IActionResult GetCertificateForStudent(int student_id)
     {
-        var query = @"SELECT ce.certificate_id, c.title, u.name, ce.issued_date 
-            FROM certificates ce INNER JOIN courses c ON ce.course_id = c.course_id 
-            INNER JOIN users u ON ce.student_id = u.user_id
-            WHERE ce.student_id = @student_id AND ce.deleted_at IS NULL ";
+        var query = @"SELECT cer.certificate_id, c.title, u.name, i.name, cer.issued_date
+            FROM certificates cer INNER JOIN courses c ON cer.course_id = c.course_id
+            INNER JOIN users u ON cer.student_id = u.user_id
+            INNER JOIN users i ON c.instructor_id = i.user_id
+            WHERE cer.student_id = @student_id AND cer.deleted_at IS NULL";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@student_id",student_id)
@@ -53,7 +54,8 @@ public class CertificatesController : ControllerBase
             certificate_id = reader.GetInt32(0),
             course_title = reader.GetString(1),
             student_name = reader.GetString(2),
-            issued_date = reader.GetDateTime(3)
+            instructor_name = reader.GetString(3),
+            issued_date = reader.GetDateTime(4)
         }, parameters).FirstOrDefault();
 
         if (certificate == null)
