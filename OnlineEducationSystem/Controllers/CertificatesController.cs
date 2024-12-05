@@ -56,7 +56,7 @@ public class CertificatesController : ControllerBase
             student_name = reader.GetString(2),
             instructor_name = reader.GetString(3),
             issued_date = reader.GetDateTime(4)
-        }, parameters).FirstOrDefault();
+        }, parameters).ToList();
 
         if (certificate == null)
         {
