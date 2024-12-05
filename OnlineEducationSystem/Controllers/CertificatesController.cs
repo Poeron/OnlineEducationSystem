@@ -39,22 +39,24 @@ public class CertificatesController : ControllerBase
     [HttpGet("student/{student_id}")]
     public IActionResult GetCertificateForStudent(int student_id)
     {
-        var query = "SELECT * FROM certificates WHERE student_id = @student_id";
+        var query = @"SELECT ce.certificate_id, c.title, u.name, ce.issued_date 
+            FROM certificates ce INNER JOIN courses c ON ce.course_id = c.course_id 
+            INNER JOIN users u ON ce.student_id = u.user_id
+            WHERE ce.student_id = @student_id AND ce.deleted_at IS NULL ";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@student_id",student_id)
         };
 
-        var certificate = _dbHelper.ExecuteReader(query, reader => new Certificates
+        var certificate = _dbHelper.ExecuteReader(query, reader => new ViewCertificate
         {
             certificate_id = reader.GetInt32(0),
-            course_id = reader.GetInt32(1),
-            student_id = reader.GetInt32(2),
-            issued_date = reader.GetDateTime(3),
-            deleted_at = reader.IsDBNull(4) ? null : reader.GetDateTime(4)
+            course_title = reader.GetString(1),
+            student_name = reader.GetString(2),
+            issued_date = reader.GetDateTime(3)
         }, parameters).FirstOrDefault();
 
-        if (certificate == null || certificate.deleted_at != null)
+        if (certificate == null)
         {
             return NotFound();
         }
