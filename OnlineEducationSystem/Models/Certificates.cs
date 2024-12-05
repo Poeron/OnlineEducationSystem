@@ -9,6 +9,13 @@ public class Certificates
     public DateTime? deleted_at { get; set; }
 }
 
+public class ViewCertificate
+{
+    public int certificate_id { get; set; }
+    public string course_title { get; set; } = String.Empty;
+    public string student_name { get; set; } = String.Empty;
+    public DateTime issued_date { get; set; }
+}
 public class CreateCertificates
 {
     public int course_id { get; set; }
