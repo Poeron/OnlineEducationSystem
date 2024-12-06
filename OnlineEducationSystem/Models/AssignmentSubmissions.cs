@@ -25,6 +25,7 @@ public class ViewAssignmentSubmission
 public class SendSubmissions
 {
     public int assignment_id { get; set; }
+    public int? grade { get; set; }
 }
 
 public class CreateAssignmentSubmissions

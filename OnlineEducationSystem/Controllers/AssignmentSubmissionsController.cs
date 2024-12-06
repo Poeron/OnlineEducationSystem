@@ -64,15 +64,16 @@ public class AssignmentSubmissionsController : ControllerBase
     [HttpGet("student/{student_id}")]
     public IActionResult GetAssignmentSubmissionsForStudent(int student_id)
     {
-        var query = "SELECT assignment_id FROM AssignmentSubmissions WHERE student_id = @student_id AND deleted_at IS NULL";
+        var query = "SELECT assignment_id, grade FROM AssignmentSubmissions WHERE student_id = @student_id AND deleted_at IS NULL";
         var parameters = new NpgsqlParameter[]
         {
         new NpgsqlParameter("@student_id", student_id)
         };
 
-        var submissions = _dbHelper.ExecuteReader(query, reader => new SendAssigments
+        var submissions = _dbHelper.ExecuteReader(query, reader => new SendSubmissions
         {
-            assignment_id = reader.GetInt32(0)
+            assignment_id = reader.GetInt32(0),
+            grade = reader.IsDBNull(1) ? null : reader.GetInt32(1)
         }, parameters).ToList();
 
         return Ok(submissions);
