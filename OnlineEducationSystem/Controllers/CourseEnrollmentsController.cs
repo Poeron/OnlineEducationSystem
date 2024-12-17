@@ -91,4 +91,21 @@ public class CourseEnrollmentsController : ControllerBase
         _dbHelper.ExecuteNonQuery(query, parameters);
         return Ok(new { message = "Kayıt Başarıyla Silindi." });
     }
+    [Authorize(Roles="student")]
+    [HttpDelete("course/{courseId}")]
+    public IActionResult DeleteCourseEnrollmentByCourseId(int courseId)
+    {
+        // get student id from token
+        var studentId = int.Parse(User.Claims.First(claim => claim.Type == "user_id").Value);
+        var query = "UPDATE CourseEnrollments SET deleted_at = @deleted_at WHERE course_id = @course_id AND student_id = @student_id AND deleted_at IS NULL";
+        var parameters = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@course_id", courseId),
+            new NpgsqlParameter("@student_id", studentId),
+            new NpgsqlParameter("@deleted_at", DateTime.Now)
+        };
+
+        _dbHelper.ExecuteNonQuery(query, parameters);
+        return Ok(new { message = "Kayıt Başarıyla Silindi." });
+    }
 }

@@ -64,7 +64,7 @@ public class AuthController : ControllerBase
 
         if (result == null)
         {
-            return Unauthorized();
+            return BadRequest(new { message = "Kullanıcı adı veya şifre hatalı." });
         }
 
         var token = GenerateToken(new Users

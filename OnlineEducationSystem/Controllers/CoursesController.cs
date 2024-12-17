@@ -69,9 +69,9 @@ public class CoursesController : ControllerBase
     {
         var query = @"
         SELECT c.*
-        FROM courseEnrollments ce
-        INNER JOIN courses c ON ce.course_id = c.course_id
-        WHERE ce.student_id = @student_id AND c.deleted_at IS NULL";
+        FROM courses c
+        INNER JOIN courseEnrollments ce ON c.course_id = ce.course_id
+        WHERE ce.student_id = @student_id AND c.deleted_at IS NULL AND ce.deleted_at IS NULL";
 
         var parameters = new NpgsqlParameter[]
         {
