@@ -6,6 +6,7 @@ using OnlineEducationSystem.Models;
 
 namespace OnlineEducationSystem.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class ExamsController : ControllerBase

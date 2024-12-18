@@ -6,6 +6,7 @@ using OnlineEducationSystem.Models;
 
 namespace OnlineEducationSystem.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class CoursesController : ControllerBase
@@ -88,6 +89,34 @@ public class CoursesController : ControllerBase
             updated_at = reader.GetDateTime(5),
             deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
         },parameters);
+
+        return Ok(courses);
+    }
+
+    [HttpGet("student/{student_id}/passive")]
+    public IActionResult GetPassiveCoursesForStudent(int student_id)
+    {
+        var query = @"
+        SELECT DISTINCT c.*
+        FROM courses c
+        INNER JOIN courseEnrollments ce ON c.course_id = ce.course_id
+        WHERE ce.student_id = @student_id AND c.deleted_at IS NULL AND ce.deleted_at IS NOT NULL";
+
+        var parameters = new NpgsqlParameter[]
+        {
+        new NpgsqlParameter("@student_id", student_id)
+        };
+
+        var courses = _dbHelper.ExecuteReader(query, reader => new Courses
+        {
+            course_id = reader.GetInt32(0),
+            instructor_id = reader.GetInt32(1),
+            title = reader.GetString(2),
+            description = reader.IsDBNull(3) ? null : reader.GetString(3),
+            created_at = reader.GetDateTime(4),
+            updated_at = reader.GetDateTime(5),
+            deleted_at = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
+        }, parameters);
 
         return Ok(courses);
     }
