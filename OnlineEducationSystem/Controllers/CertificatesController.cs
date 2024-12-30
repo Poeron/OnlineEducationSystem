@@ -93,7 +93,7 @@ public class CertificatesController : ControllerBase
         return Ok(certificate);
     }
 
-    [Authorize(Roles = "instructor,admin")]
+    [Authorize(Roles = "instructor,admin,student")]
     [HttpPost]
     public IActionResult CreateCertificate([FromBody] CreateCertificates certificate)
     {
