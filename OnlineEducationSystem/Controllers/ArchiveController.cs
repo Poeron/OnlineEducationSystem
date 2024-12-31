@@ -61,7 +61,7 @@ namespace OnlineEducationSystem.Controllers
         [HttpGet("users")]
         public IActionResult GetDeletedUsers()
         {
-            var query = "SELECT * FROM users WHERE deleted_at IS NOT NULL";
+            var query = "SELECT * FROM users WHERE deleted_at IS NOT NULL ORDER BY user_id ASC";
             var users = _dbHelper.ExecuteReader(query, reader => new Users
             {
                 user_id = reader.GetInt32(0),

@@ -48,21 +48,28 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginDTO user)
     {
-        var query = "SELECT user_id,role,name FROM users WHERE email = @email AND password = @password";
+        var query = "SELECT user_id,role,name,password FROM users WHERE email = @email";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@email", user.email),
-            new NpgsqlParameter("@password", user.password)
         };
+
 
         var result = _dbHelper.ExecuteReader(query, reader => new 
         {
             user_id = reader.GetInt32(0),
             role = reader.GetString(1),
-            name = reader.GetString(2)
+            name = reader.GetString(2),
+            password = reader.GetString(3)
         }, parameters).FirstOrDefault();
 
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.password);
+
         if (result == null)
+        {
+            return BadRequest(new { message = "Kullanıcı Bulunamadı." });
+        }
+        if (!BCrypt.Net.BCrypt.Verify(user.password, result.password))
         {
             return BadRequest(new { message = "Kullanıcı adı veya şifre hatalı." });
         }
@@ -82,10 +89,13 @@ public class AuthController : ControllerBase
     public IActionResult Register([FromBody] RegisterDTO user)
     {
         var query = "INSERT INTO users (email, password, role, name) VALUES (@email, @password, @role, @name)";
+
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.password);
+
         var parameters = new[]
         {
             new NpgsqlParameter("@email", user.email),
-            new NpgsqlParameter("@password", user.password),
+            new NpgsqlParameter("@password", hashedPassword),
             new NpgsqlParameter("@role", user.role),
             new NpgsqlParameter("@name", user.name)
         };

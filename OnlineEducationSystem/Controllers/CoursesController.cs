@@ -24,7 +24,7 @@ public class CoursesController : ControllerBase
     [HttpGet]
     public IActionResult GetCourses()
     {
-        var query = "SELECT * FROM courses";
+        var query = "SELECT * FROM courses ORDER BY course_id ASC";
         var courses = _dbHelper.ExecuteReader(query, reader => new Courses
         {
             course_id = reader.GetInt32(0),

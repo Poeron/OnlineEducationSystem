@@ -91,6 +91,22 @@ public class ExamsController : ControllerBase
         return Ok(exam);
     }
 
+    [HttpGet("course_exam/{course_id}")]
+    public IActionResult GetExamForCourse(int course_id)
+    {
+        var query = "SELECT exam_id FROM exams WHERE course_id = @course_id AND deleted_at IS NULL";
+        var parameters = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@course_id", course_id)
+        };
+        var exam = _dbHelper.ExecuteReader(query, reader => new
+        {
+            exam_id = reader.GetInt32(0)
+        }, parameters).FirstOrDefault();
+
+        return Ok(exam);
+    }
+
     [Authorize(Roles = "instructor, admin")]
     [HttpPost]
     public IActionResult CreateExam([FromBody] CreateExams exam)

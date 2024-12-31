@@ -25,7 +25,7 @@ public class UsersController : ControllerBase
     [HttpGet]
     public IActionResult GetUsers()
     {
-        var query = "SELECT * FROM Users";
+        var query = "SELECT * FROM Users ORDER BY user_id ASC";
         var users = _dbHelper.ExecuteReader(query, reader => new Users
         {
             user_id = reader.GetInt32(0),
@@ -78,10 +78,11 @@ public class UsersController : ControllerBase
     public IActionResult CreateUser([FromBody] CreateUser user)
     {
         var query = "INSERT INTO Users (email, password, role, name) VALUES (@email, @password, @role, @name)";
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.password);
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@email", user.email),
-            new NpgsqlParameter("@password", user.password), // Password should be hashed
+            new NpgsqlParameter("@password", hashedPassword),
             new NpgsqlParameter("@role", user.role),
             new NpgsqlParameter("@name", user.name)
         };
@@ -95,13 +96,15 @@ public class UsersController : ControllerBase
     [HttpPatch]
     public IActionResult UpdateUser([FromBody] UpdateUser user)
     {
-        var query = "UPDATE Users SET name = @name, role = @role, email = @email WHERE user_id = @user_id";
+        var query = "UPDATE Users SET name = @name, role = @role, email = @email, password = @password WHERE user_id = @user_id";
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.password);
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@user_id", user.user_id),
             new NpgsqlParameter("@name", user.name),
             new NpgsqlParameter("@email", user.email),
-            new NpgsqlParameter("@role", user.role)
+            new NpgsqlParameter("@role", user.role),
+            new NpgsqlParameter("@password", hashedPassword)
         };
 
         _dbHelper.ExecuteNonQuery(query, parameters);
