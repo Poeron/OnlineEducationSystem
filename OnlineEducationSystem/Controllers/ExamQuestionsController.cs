@@ -106,13 +106,22 @@ public class ExamQuestionsController : ControllerBase
     public IActionResult DeleteExamQuestion(int id)
     {
         var query = "UPDATE ExamQuestions SET deleted_at = @deleted_at WHERE question_id = @question_id";
-        var parameters = new NpgsqlParameter[]
+        var query2 = "UPDATE QuestionOptions SET deleted_at = @deleted_at WHERE question_id = @question_id";
+
+        var parameters1 = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@question_id", id),
             new NpgsqlParameter("@deleted_at", DateTime.Now)
         };
 
-        _dbHelper.ExecuteNonQuery(query, parameters);
+        var parameters2 = new NpgsqlParameter[]
+        {
+            new NpgsqlParameter("@question_id", id),
+            new NpgsqlParameter("@deleted_at", DateTime.Now)
+        };
+
+        _dbHelper.ExecuteNonQuery(query, parameters1);
+        _dbHelper.ExecuteNonQuery(query2, parameters2);
         return Ok(new { message = "Kayıt Başarıyla Silindi." });
     }
 }

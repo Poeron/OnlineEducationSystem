@@ -17,6 +17,7 @@ public class ViewComments
     public string author_name { get; set; } = string.Empty;
     public string comment_text { get; set; } = string.Empty;
     public DateTime created_at { get; set; }
+    public int author_id { get; set; }
 
 }
 public class CreateForumComments

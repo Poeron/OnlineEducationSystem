@@ -42,7 +42,7 @@ public class ForumCommentsController : ControllerBase
     [HttpGet("Course/{course_id}")]
     public IActionResult GetCommentsForCourse(int course_id)
     {
-        var query = "SELECT fc.comment_id, fc.comment_text, fc.created_at, u.name FROM ForumComments fc INNER JOIN Users u ON u.user_id = fc.author_id  WHERE course_id = @course_id AND fc.deleted_at IS NULL ORDER BY fc.created_at ASC";
+        var query = "SELECT fc.comment_id, fc.comment_text, fc.created_at, u.name, fc.author_id FROM ForumComments fc INNER JOIN Users u ON u.user_id = fc.author_id  WHERE course_id = @course_id AND fc.deleted_at IS NULL ORDER BY fc.created_at ASC";
         var parameters = new NpgsqlParameter[]
         {
             new NpgsqlParameter("@course_id", course_id)
@@ -53,7 +53,8 @@ public class ForumCommentsController : ControllerBase
             comment_id = reader.GetInt32(0),
             comment_text = reader.GetString(1),
             created_at = reader.GetDateTime(2),
-            author_name = reader.GetString(3)
+            author_name = reader.GetString(3),
+            author_id = reader.GetInt32(4)
         }, parameters);
 
         return Ok(comments);
@@ -118,7 +119,7 @@ public class ForumCommentsController : ControllerBase
         return Ok(new { message = "Güncelleme Başarılı" });
     }
 
-    [Authorize(Roles = "instructor, admin")]
+    [Authorize(Roles = "instructor, admin, student")]
     [HttpDelete("{id}")]
     public IActionResult DeleteForumComment(int id)
     {
