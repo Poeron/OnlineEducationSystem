@@ -63,8 +63,6 @@ public class AuthController : ControllerBase
             password = reader.GetString(3)
         }, parameters).FirstOrDefault();
 
-        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.password);
-
         if (result == null)
         {
             return BadRequest(new { message = "Kullanıcı Bulunamadı." });
