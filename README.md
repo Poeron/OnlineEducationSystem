@@ -91,7 +91,7 @@ OnlineEducationSystem/
 
 1. **Projeyi klonlayın**
 ```bash
-git clone https://github.com/yourusername/OnlineEducationSystem.git
+git clone https://github.com/Poeron/OnlineEducationSystem.git
 cd OnlineEducationSystem
 ```
 
@@ -258,8 +258,8 @@ dotnet publish -c Release
 ## 📞 İletişim
 
 Proje ile ilgili sorularınız için:
-- **GitHub Issues**: [Issues sayfası](https://github.com/yourusername/OnlineEducationSystem/issues)
-- **Email**: your.email@example.com
+- **GitHub Issues**: [Issues sayfası](https://github.com/Poeron/OnlineEducationSystem/issues)
+- **Email**: oktemronay@gmail.com
 
 ## 📄 Lisans
 
